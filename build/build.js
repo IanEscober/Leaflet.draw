@@ -45,8 +45,6 @@ function getFiles(compsBase32) {
     return files;
 }
 
-exports.getFiles = getFiles;
-
 function getSizeDelta(newContent, oldContent, fixCRLF) {
     if (!oldContent) {
         return ' (new)';
@@ -71,8 +69,6 @@ function loadSilently(path) {
     }
 }
 
-// Concatenate the files while building up a sourcemap for the concatenation,
-// and replace the line defining L.version with the string prepared in the jakefile
 function bundleFiles(files, copy, version) {
     var node = new SourceNode(null, null, null, '');
 
@@ -115,14 +111,13 @@ function bytesToKB(bytes) {
     return (bytes / 1024).toFixed(2) + ' KB';
 }
 
-
-exports.build = function (callback, version, compsBase32, buildName) {
+function build (callback, version, compsBase32, buildName) {
 
     var files = getFiles(compsBase32);
 
     console.log('Bundling and compressing ' + files.length + ' files...');
 
-    var copy = fs.readFileSync('src/copyright.js', 'utf8').replace('{VERSION}', version),
+    var copy =
 
         filenamePart = 'leaflet.draw' + (buildName ? '-' + buildName : ''),
         pathPart = 'dist/' + filenamePart,
@@ -147,7 +142,7 @@ exports.build = function (callback, version, compsBase32, buildName) {
     try {
         newCompressedCss = UglifyCss.processFiles(
             [leafletDrawCssPath],
-            {maxLineLen: 500, expandVars: true}
+            { maxLineLen: 500, expandVars: true }
         )
     } catch (e) {
         console.error('UglifyCss failed to minify the files');
@@ -183,9 +178,9 @@ exports.build = function (callback, version, compsBase32, buildName) {
 
     try {
         newCompressed = copy + UglifyJS.minify(newSrc, {
-                warnings: true,
-                fromString: true
-            }).code;
+            warnings: true,
+            fromString: true
+        }).code;
     } catch (err) {
         console.error('UglifyJS failed to minify the files');
         console.error(err);
@@ -227,49 +222,5 @@ exports.build = function (callback, version, compsBase32, buildName) {
     });
 };
 
-exports.test = function (complete, fail) {
-    var karma = require('karma'),
-        testConfig = {configFile: __dirname + '/../spec/karma.conf.js'};
-
-    testConfig.browsers = ['PhantomJSCustom'];
-
-    function isArgv(optName) {
-        return process.argv.indexOf(optName) !== -1;
-    }
-
-    if (isArgv('--chrome')) {
-        testConfig.browsers.push('Chrome');
-    }
-    if (isArgv('--safari')) {
-        testConfig.browsers.push('Safari');
-    }
-    if (isArgv('--ff')) {
-        testConfig.browsers.push('Firefox');
-    }
-    if (isArgv('--ie')) {
-        testConfig.browsers.push('IE');
-    }
-
-    if (isArgv('--cov')) {
-        testConfig.preprocessors = {
-            'src/**/*.js': 'coverage'
-        };
-        testConfig.coverageReporter = {
-            type: 'html',
-            dir: 'coverage/'
-        };
-        testConfig.reporters = ['coverage'];
-    }
-
-    console.log('Running tests...');
-
-    var server = new karma.Server(testConfig, function (exitCode) {
-        if (!exitCode) {
-            console.log('\tTests ran successfully.\n');
-            complete();
-        } else {
-            process.exit(exitCode);
-        }
-    });
-    server.start();
-};
+exports.getFiles = getFiles;
+exports.build = build;
