@@ -117,8 +117,7 @@ function build (callback, version, compsBase32, buildName) {
 
     console.log('Bundling and compressing ' + files.length + ' files...');
 
-    var copy =
-
+    var copy = '',
         filenamePart = 'leaflet.draw' + (buildName ? '-' + buildName : ''),
         pathPart = 'dist/' + filenamePart,
         srcPath = pathPart + '-src.js',
